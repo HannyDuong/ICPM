@@ -10,20 +10,20 @@ ICMP_ECHO_REQUEST = 8
 
 def checksum(str_):
     # In this function we make the checksum of our packet 
-    str_ = bytearray(str_)
+    
     csum = 0
     countTo = (len(str_) // 2) * 2
-    #count = 0
+    count = 0
 
-    for count in range(0, countTo, 2):
-        thisVal = str_[count+1] * 256 + str_[count]
-        csum = csum + thisVal
-        csum = csum & 0xffffffff
+    while count < countTo:
+       thisVal = ord(str_[count + 1]) * 256 + ord(str_[count])
+       csum = csum + thisVal
+       csum = csum & 0xffffffff
+       count = count + 2
 
     if countTo < len(str_):
-        csum = csum + str_[-1]
-        csum = csum & 0xffffffff
-
+       csum = csum + ord(str_[len(str_) - 1])
+       csum = csum & 0xffffffff
     csum = (csum >> 16) + (csum & 0xffff)
     csum = csum + (csum >> 16)
     answer = ~csum
@@ -65,7 +65,7 @@ def sendOnePing(mySocket, destAddr, ID):
     header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
     data = struct.pack("d", time.time())
     # Calculate the checksum on the data and the dummy header.
-    myChecksum = checksum(header + data)
+    myChecksum = checksum(str(header + data))
 
     # Get the right checksum, and put in the header
     if sys.platform == 'darwin':
